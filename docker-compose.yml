@@ -1,0 +1,100 @@
+networks:
+  my_network:
+    external: true
+
+services:
+
+## VPN
+  wg-easy:
+    image: ghcr.io/wg-easy/wg-easy
+    container_name: wg-easy
+    environment:
+      - PASSWORD_HASH=${WG_EASY_PASSWORD_HASH}
+      - WG_HOST=${VPN_DOMAIN_NAME}
+      - WG_PORT=51820
+      - WG_DEFAULT_ADDRESS=10.9.0.x
+      - WG_DEFAULT_DNS=172.19.0.3
+    volumes:
+      - ${CONTAINERS_DATA}/wireguard:/etc/wireguard
+    ports:
+      - "51820:51820/udp"
+      - "51821:51821/tcp"
+    networks:
+      my_network:
+        ipv4_address: 172.19.0.2
+    restart: always
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    sysctls:
+      - net.ipv4.ip_forward=1
+      - net.ipv4.conf.all.src_valid_mark=1
+
+## DNS / AD Blocker
+  adguardhome:
+    image: adguard/adguardhome
+    container_name: adguardhome
+    volumes:
+      - ${CONTAINERS_DATA}/adguardhome/work:/opt/adguardhome/work
+      - ${CONTAINERS_DATA}/adguardhome/conf:/opt/adguardhome/conf
+    networks:
+      my_network:
+        ipv4_address: 172.19.0.3
+    restart: always
+
+## Reverse Proxy and TLS
+  traefik:
+    container_name: traefik
+    image: traefik:v3.6.1
+    command:
+      - --api.insecure=true
+      - --providers.docker
+      - --providers.docker.exposedbydefault=false
+      - --entryPoints.web-secure.address=:443
+      - --entrypoints.websecure.http.tls=true
+      - --certificatesresolvers.myresolver.acme.dnschallenge=true
+      - --certificatesresolvers.myresolver.acme.dnschallenge.provider=cloudflare
+      - --certificatesresolvers.myresolver.acme.email=${EMAIL_ADDRESS}
+      - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
+    environment:
+      - CF_DNS_API_TOKEN=${CLOUDFLARE_API_KEY}
+    ports:
+      - 443:443
+      - 8080:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${CONTAINERS_DATA}/traefik/letsencrypt:/letsencrypt
+    networks:
+      my_network:
+        ipv4_address: 172.19.0.4
+    restart: always
+
+## Password Manager
+  vaultwarden:
+    image: vaultwarden/server:1.35.1
+    container_name: vaultwarden
+    environment:
+      - TZ=Europe/Paris
+      - SIGNUPS_ALLOWED=true
+      - DOMAIN=https://${VAULTWARDEN_DOMAIN_NAME}
+      ## To enable push go to https://bitwarden.com/host/ to get your ID and Key
+      - PUSH_ENABLED=true
+      - PUSH_INSTALLATION_ID=${PUSH_INSTALLATION_ID}
+      - PUSH_INSTALLATION_KEY=${PUSH_INSTALLATION_KEY}
+      ## Uncomment those 2 lines if you used the Europen region to get your IDs
+      #- PUSH_RELAY_URI=https://api.bitwarden.eu
+      #- PUSH_IDENTITY_URI=https://identity.bitwarden.eu
+    volumes:
+      - ${CONTAINERS_DATA}/vaultwarden/data:/data/
+    ports:
+      - 80
+    restart: always
+    networks:
+      my_network:
+        ipv4_address: 172.19.0.5
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.vaultwarden.rule=Host(`${VAULTWARDEN_DOMAIN_NAME}`)
+      - traefik.http.routers.vaultwarden.entrypoints=web-secure
+      - traefik.http.routers.vaultwarden.tls=true
+      - traefik.http.routers.vaultwarden.tls.certresolver=myresolver
