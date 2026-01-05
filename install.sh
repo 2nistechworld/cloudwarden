@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 # Colors for output
 GREEN='\033[0;32m'
@@ -67,11 +66,11 @@ read -p "Enter your domain name: " DOMAIN_NAME
 while true
     do
         echo -e "${BLUE}NOTE: You need a Cloudflare API Token for DNS challenges.${NC}"
+        echo -e "${BLUE}https://github.com/2nistechworld/cloudwarden#how-to-get-your-cloudflare-api-key${NC}"
         read -p "Enter Cloudflare API Key: " CLOUDFLARE_API_KEY
         CHECK_CLOUDFLARE_API_KEY=$(curl -s "https://api.cloudflare.com/client/v4/user/tokens/verify" --header "Authorization: Bearer $CLOUDFLARE_API_KEY" | grep "This API Token is valid and active")
             if [ -z "$CHECK_CLOUDFLARE_API_KEY" ]; then
                 echo -e "${RED}CloudFlare API Key Not valid, try again${NC}"
-                continue
             else
                 echo -e "${GREEN}CloudFlare API Key valid${NC}"
                 break
@@ -82,7 +81,10 @@ echo -e "${BLUE}To enable push go to https://bitwarden.com/host/ to get your ID 
 read -p "Enter Push Installation ID: " PUSH_INSTALLATION_ID
 read -p "Enter Push Installation Key: " PUSH_INSTALLATION_KEY
 read -p "Did you choose the bitwarden.eu (European Union) Region? (y/n): " EU_REGION
-
+if [[ "$EU_REGION" =~ ^[Yy]$ ]]; then
+    sed -i 's/#- PUSH_RELAY_URI/- PUSH_RELAY_URI/' docker-compose.yml
+    sed -i 's/#- PUSH_IDENTITY_URI/- PUSH_IDENTITY_URI/' docker-compose.yml
+fi
 
 ## Function to create DNS entry
 #Create Public DNS record for the VPN using Cloudflare API
@@ -140,7 +142,6 @@ sed -i "s;<CONTAINERS_DATA>;$CONTAINERS_DATA;g" $ENV_FILE
 sed -i "s;<DOMAIN_NAME>;$DOMAIN_NAME;g" $ENV_FILE
 sed -i "s;<EMAIL_ADDRESS>;$EMAIL_ADDRESS;g" $ENV_FILE
 #WG-EASY
-sed -i "s;<WG_EASY_PASSWORD_HASH>;$WG_EASY_PASSWORD_HASH;g" $ENV_FILE
 sed -i "s;<VPN_DOMAIN_NAME>;$VPN_DOMAIN_NAME;g" $ENV_FILE
 #TRAEFIK
 sed -i "s;<CLOUDFLARE_API_KEY>;$CLOUDFLARE_API_KEY;g" $ENV_FILE
@@ -181,5 +182,22 @@ echo -e "\n${BLUE}Starting services...${NC}"
 docker compose up -d
 
 echo -e "\n${GREEN}Installation completed!${NC}"
-echo "WireGuard UI: http://$VPN_DOMAIN_NAME (Check port mapping if behind NAT/Firewall)"
-echo "Vaultwarden: https://$VAULTWARDEN_DOMAIN_NAME"
+echo -e "\n${BLUE}Next steps:${NC}"
+echo -e "\n${BLUE}Access WG_EASY UI :${NC}"
+echo "If you ran this script on a machine running in your local network,"
+echo "you can access the WG_EASY UI using http://your_local_ip:51821"
+echo "Or"
+echo "If you ran this script on a cloud VPS, you can either temporary open the port 51821"
+echo "to acess WG_EASY UI using http://$PUBLIC_IP:51821 or create a SSH tunnel with the command:"
+echo "ssh -L 51821:172.19.0.2:51821 user@$PUBLIC_IP in your terminal"
+echo "Once the tunnel open open a browser and access http://localhost:51821"
+echo -e "\n${BLUE}Informations :${NC}"
+echo -e "\n${GREEN}Once connected to the VPN you can access :${NC}"
+echo "WG-EASY UI: https://vpnui.$DOMAIN_NAME"
+echo "Vaultwarden: https://vault.$DOMAIN_NAME"
+echo "AdGuardHome: http://172.19.0.3"
+echo "Login: $EMAIL_ADDRESS"
+echo "Password: $ADGUARDHOME_PASSWORD"
+
+#cleanup
+rm -f AdGuardHome.yaml 

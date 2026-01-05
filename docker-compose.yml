@@ -15,7 +15,7 @@ services:
       - INIT_HOST=${VPN_DOMAIN_NAME}
       - INIT_DNS=172.19.0.3
     volumes:
-      - ${CONTAINERS_DATA}/wireguard:/etc/wireguard
+      - ${CONTAINERS_DATA}/wg-easy:/etc/wireguard
       - /lib/modules:/lib/modules:ro
     ports:
       - "51820:51820/udp"
