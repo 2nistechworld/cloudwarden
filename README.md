@@ -38,11 +38,11 @@ This configuration will NOT expose the password manager to internet it will be o
 
 - Get the docker compose file
 
-```wget -O docker-compose.yml https://github.com/2nistechworld/cloudwarden/blob/main/docker-compose.yml```
+```wget -O docker-compose.yml https://raw.githubusercontent.com/2nistechworld/cloudwarden/refs/heads/main/docker-compose.yml```
 
 - Get the .env file
 
-```wget -O .env https://github.com/2nistechworld/cloudwarden/blob/main/example.env```
+```wget -O .env https://raw.githubusercontent.com/2nistechworld/cloudwarden/refs/heads/main/example.env```
 
 - Edit the .env file as follow
 

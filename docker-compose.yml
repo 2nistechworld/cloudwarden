@@ -76,7 +76,7 @@ services:
     environment:
       - TZ=Europe/Paris
       - SIGNUPS_ALLOWED=true
-      - DOMAIN=https://${VAULTWARDEN_DOMAIN_NAME}
+      - DOMAIN=https://vault.${DOMAIN_NAME}
       ## To enable push go to https://bitwarden.com/host/ to get your ID and Key
       - PUSH_ENABLED=true
       - PUSH_INSTALLATION_ID=${PUSH_INSTALLATION_ID}
@@ -94,7 +94,7 @@ services:
         ipv4_address: 172.19.0.5
     labels:
       - traefik.enable=true
-      - traefik.http.routers.vaultwarden.rule=Host(`${VAULTWARDEN_DOMAIN_NAME}`)
+      - traefik.http.routers.vaultwarden.rule=Host(`vault.${DOMAIN_NAME}`)
       - traefik.http.routers.vaultwarden.entrypoints=web-secure
       - traefik.http.routers.vaultwarden.tls=true
       - traefik.http.routers.vaultwarden.tls.certresolver=myresolver
