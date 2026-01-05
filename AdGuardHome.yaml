@@ -152,6 +152,9 @@ filtering:
     - domain: vault.<DOMAIN_NAME>
       answer: 172.19.0.4
       enabled: true
+    - domain: vpnui.<DOMAIN_NAME>
+      answer: 172.19.0.4
+      enabled: true  
   safe_fs_patterns:
     - /opt/adguardhome/work/userfilters/*
   safebrowsing_cache_size: 1048576

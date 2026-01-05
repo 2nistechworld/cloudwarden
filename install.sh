@@ -51,6 +51,11 @@ check_dependencies() {
 
 check_dependencies
 
+# Download docker-compose file and .env
+wget -O docker-compose.yml https://raw.githubusercontent.com/2nistechworld/cloudwarden/refs/heads/main/docker-compose.yml
+wget -O .env https://raw.githubusercontent.com/2nistechworld/cloudwarden/refs/heads/main/example.env
+wget -O AdGuardHome.yaml https://raw.githubusercontent.com/2nistechworld/cloudwarden/refs/heads/main/AdGuardHome.yaml
+
 # Configuration Prompts
 echo -e "\n${BLUE}Configuration${NC}"
 echo "--------------------------------"
@@ -64,26 +69,25 @@ mkdir -p "$CONTAINERS_DATA"
 read -p "Enter Email Address for Let's Encrypt: " EMAIL_ADDRESS
 read -p "Enter your domain name: " DOMAIN_NAME
 
-echo -e "${BLUE}NOTE: You need a Cloudflare API Token for DNS challenges.${NC}"
-read -p "Enter Cloudflare API Key: " CLOUDFLARE_API_KEY
+while true
+    do
+        echo -e "${BLUE}NOTE: You need a Cloudflare API Token for DNS challenges.${NC}"
+        read -p "Enter Cloudflare API Key: " CLOUDFLARE_API_KEY
+        CHECK_CLOUDFLARE_API_KEY=$(curl -s "https://api.cloudflare.com/client/v4/user/tokens/verify" --header "Authorization: Bearer $CLOUDFLARE_API_KEY" | grep "This API Token is valid and active")
+            if [ -z "$CHECK_CLOUDFLARE_API_KEY" ]; then
+                echo -e "${RED}CloudFlare API Key Not valid, try again${NC}"
+                continue
+            else
+                echo -e "${GREEN}CloudFlare API Key valid${NC}"
+                break
+            fi
+    done
+echo -e "${BLUE}Bitwarden push notification configuration${NC}"
+echo -e "${BLUE}To enable push go to https://bitwarden.com/host/ to get your ID and Key${NC}"
+read -p "Enter Push Installation ID: " PUSH_INSTALLATION_ID
+read -p "Enter Push Installation Key: " PUSH_INSTALLATION_KEY
+read -p "Did you choose the bitwarden.eu (European Union) Region? (y/n): " EU_REGION
 
-echo -e "${BLUE}Set a password for the WireGuard Web UI.${NC}"
-read -s -p "Enter WireGuard Password: " WG_PASSWORD
-echo ""
-
-# Generate WireGuard Password Hash
-echo -e "\n${BLUE}Generating WireGuard password hash...${NC}"
-WG_EASY_PASSWORD_HASH=$(docker run --rm ghcr.io/wg-easy/wg-easy wgpw "$WG_PASSWORD" | cut -d "'" -f2 | sed 's/\$/\$$/g')
-
-# Optional Bitwarden Push Notifications
-read -p "Do you want to configure Bitwarden Push Notifications? (y/n): " CONFIGURE_PUSH
-if [[ "$CONFIGURE_PUSH" =~ ^[Yy]$ ]]; then
-    read -p "Enter Push Installation ID: " PUSH_INSTALLATION_ID
-    read -p "Enter Push Installation Key: " PUSH_INSTALLATION_KEY
-else
-    PUSH_INSTALLATION_ID=""
-    PUSH_INSTALLATION_KEY=""
-fi
 
 ## Function to create DNS entry
 #Create Public DNS record for the VPN using Cloudflare API
@@ -134,10 +138,6 @@ else
     VPN_DOMAIN_NAME=$PUBLIC_IP
 fi
 
-# Download docker-compose file and .env
-wget -O docker-compose.yml https://raw.githubusercontent.com/2nistechworld/cloudwarden/refs/heads/main/docker-compose.yml
-wget -O .env https://raw.githubusercontent.com/2nistechworld/cloudwarden/refs/heads/main/example.env
-
 #Edit the .env file
 ENV_FILE=.env
 #GENERAL
@@ -154,12 +154,17 @@ sed -i "s;<PUSH_INSTALLATION_ID>;$PUSH_INSTALLATION_ID;g" $ENV_FILE
 sed -i "s;<PUSH_INSTALLATION_KEY>;$PUSH_INSTALLATION_KEY;g" $ENV_FILE
 
 #Create folders
-mkdir -p $CONTAINERS_DATA/wireguard
+mkdir -p $CONTAINERS_DATA/wg-easy
 mkdir -p $CONTAINERS_DATA/adguardhome/work
 mkdir -p $CONTAINERS_DATA/adguardhome/conf
 mkdir -p $CONTAINERS_DATA/traefik/letsencrypt
 mkdir -p $CONTAINERS_DATA/vaultwarden/data
 
+## Create passwords
+## AdGuardHome
+ADGUARDHOME_PASSWORD=$(cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 35 ; echo '')
+docker pull httpd:2.4
+ADGUARDHOME_PASSWORD_HASH=$(docker run httpd:2.4 htpasswd -B -n -b $EMAIL_ADDRESS $ADGUARDHOME_PASSWORD | cut -d ":" -f2)
 ##Create adguard rewrite for Vaultwarden
 cp AdGuardHome.yaml $CONTAINERS_DATA/adguardhome/conf/AdGuardHome.yaml
 sed -i "s;<EMAIL_ADDRESS>;$EMAIL_ADDRESS;g" $CONTAINERS_DATA/adguardhome/conf/AdGuardHome.yaml

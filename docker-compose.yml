@@ -6,16 +6,17 @@ services:
 
 ## VPN
   wg-easy:
-    image: ghcr.io/wg-easy/wg-easy
+    image: ghcr.io/wg-easy/wg-easy:15
     container_name: wg-easy
     environment:
-      - PASSWORD_HASH=${WG_EASY_PASSWORD_HASH}
-      - WG_HOST=${VPN_DOMAIN_NAME}
-      - WG_PORT=51820
-      - WG_DEFAULT_ADDRESS=10.9.0.x
-      - WG_DEFAULT_DNS=172.19.0.3
+      - INSECURE=true
+      - HOST=172.19.0.2
+      - INIT_ENABLED=true
+      - INIT_HOST=${VPN_DOMAIN_NAME}
+      - INIT_DNS=172.19.0.3
     volumes:
       - ${CONTAINERS_DATA}/wireguard:/etc/wireguard
+      - /lib/modules:/lib/modules:ro
     ports:
       - "51820:51820/udp"
       - "51821:51821/tcp"
@@ -29,6 +30,13 @@ services:
     sysctls:
       - net.ipv4.ip_forward=1
       - net.ipv4.conf.all.src_valid_mark=1
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.wg-easy.loadbalancer.server.port=51821
+      - traefik.http.routers.wg-easy.rule=Host(`vpnui.${DOMAIN_NAME}`)
+      - traefik.http.routers.wg-easy.entrypoints=web-secure
+      - traefik.http.routers.wg-easy.tls=true
+      - traefik.http.routers.wg-easy.tls.certresolver=myresolver
 
 ## DNS / AD Blocker
   adguardhome:
