@@ -15,6 +15,10 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+# Updating the packages
+echo "Updating the packages"
+apt update && apt upgrade
+
 # Function to check and install dependencies
 check_dependencies() {
     echo -e "${BLUE}Checking dependencies...${NC}"
@@ -22,12 +26,12 @@ check_dependencies() {
     # Check for curl and wget
     if ! command -v curl &> /dev/null; then
         echo "Installing curl..."
-        apt-get update && apt-get install -y curl
+        apt install curl -y
     fi
 
     if ! command -v wget &> /dev/null; then
         echo "Installing wget..."
-        apt-get update && apt-get install -y wget
+        apt install wget -y
     fi
 
     DOCKER_BIN=$(which docker)
