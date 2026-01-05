@@ -22,22 +22,33 @@ This configuration will NOT expose the password manager to internet it will be o
 - Install docker and docker compose if not installed
     - https://docs.docker.com/engine/install/
     - Add the non root user to the docker group to run docker commands without sudo:
+
    ```sudo usermod -aG docker $USER```
+
 - Create a network for the containers to communicate.
+
 ```docker network create --driver=bridge --subnet=172.19.0.0/16 --gateway=172.19.0.1 my_network```
+
 - Create a password for wg-easy UI (The UI will be exposed on internet during the initial setup, so choose a strong password)
     - Replace "yourSecurePassword" with your desired password in the command below:
+
   ```docker run -it ghcr.io/wg-easy/wg-easy wgpw yourSecurePassword | cut -d "'" -f2 | sed 's/\$/\$$/g'```
+
   Save the output hash for later use in the .env file.
+
 - Get the docker compose file
+
 ```wget -O docker-compose.yml https://github.com/2nistechworld/cloudwarden/blob/main/docker-compose.yml```
+
 - Get the .env file
+
 ```wget -O .env https://github.com/2nistechworld/cloudwarden/blob/main/example.env```
+
 - Edit the .env file as follow
 
 | NAme                    | Values                          |
 |-------------------------|---------------------------------|
-| CONTAINERS_DATA.        | Folders to store datas          |
+| CONTAINERS_DATA         | Folders to store datas          |
 | EMAIL_ADDRESS           | Email address for Let's encrypt |
 | PUSH_INSTALLATION_ID    | Bitwarden installation ID       |  
 | PUSH_INSTALLATION_KEY   | Bitwarden installation key      |  
@@ -47,10 +58,8 @@ This configuration will NOT expose the password manager to internet it will be o
 | VPN_DOMAIN_NAME         | ex: vpn.mydomain.com            |
 
 - Start all the services with
+
 ```docker compose up -d```
-
-
-
 
 ## How to get your Cloudflare API Key
 To get you API token go to https://dash.cloudflare.com/profile/api-tokens
