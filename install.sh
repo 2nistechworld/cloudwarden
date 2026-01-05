@@ -31,22 +31,17 @@ check_dependencies() {
         apt-get update && apt-get install -y wget
     fi
 
-    # Check for Docker
-    if ! command -v docker &> /dev/null; then
-        echo -e "${BLUE}Docker not found. Installing Docker...${NC}"
-        curl -fsSL https://get.docker.com -o get-docker.sh
-        sh get-docker.sh
-        rm get-docker.sh
-        echo -e "${GREEN}Docker installed successfully.${NC}"
-    else
-        echo -e "${GREEN}Docker is already installed.${NC}"
-    fi
-
-    # Check for Docker Compose (plugin)
-    if ! docker compose version &> /dev/null; then
-         echo -e "${RED}Docker Compose plugin not found. Please verify your Docker installation.${NC}"
-         exit 1
-    fi
+    DOCKER_BIN=$(which docker)
+        if [ -z "$DOCKER_BIN" ]
+        then
+            echo -e "${BLUE}Docker not found. Installing Docker...${NC}"
+            curl -fsSL https://get.docker.com -o get-docker.sh
+            sh get-docker.sh
+            rm get-docker.sh
+            echo -e "${GREEN}Docker installed successfully.${NC}"
+        else
+            echo -e "${GREEN}Docker is already installed.${NC}"
+        fi
 }
 
 check_dependencies
