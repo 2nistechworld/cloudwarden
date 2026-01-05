@@ -183,11 +183,12 @@ docker compose up -d
 
 echo -e "\n${GREEN}Installation completed!${NC}"
 echo -e "\n${BLUE}Next steps:${NC}"
+echo -e "To connect to the VPN remotetely you need to ${RED}Open the port 51820/udp in your firewall.${NC}"
 echo -e "\n${BLUE}Access WG_EASY UI :${NC}"
 echo "If you ran this script on a machine running in your local network,"
 echo "you can access the WG_EASY UI using http://your_local_ip:51821"
 echo "Or"
-echo "If you ran this script on a cloud VPS, you can either temporary open the port 51821"
+echo "If you ran this script on a cloud VPS, you can either temporary open the port 51821/tcp "
 echo "to acess WG_EASY UI using http://$PUBLIC_IP:51821 or create a SSH tunnel with the command:"
 echo "ssh -L 51821:172.19.0.2:51821 user@$PUBLIC_IP in your terminal"
 echo "Once the tunnel open open a browser and access http://localhost:51821"
