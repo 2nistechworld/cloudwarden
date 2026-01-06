@@ -222,7 +222,7 @@ echo -e "To connect to the VPN remotetely you need to ${RED}Open the port 51820/
 echo -e "${GREEN}$VPN_DOMAIN_NAME will be uses to connect to the VPN remotely.${NC}"
 echo -e "\n${BLUE}Access WG_EASY UI :${NC}"
 echo "WG-EASY Username: $EMAIL_ADDRESS"
-echo "WG-EASY Password: $WG_EASY_PASSWORD"
+echo "WG-EASY Password: $WG_EASY_INIT_PASSWORD"
 echo "If you ran this script on a machine running in your local network,"
 echo "you can access the WG_EASY UI using http://your_local_ip:51821"
 echo "Or"
