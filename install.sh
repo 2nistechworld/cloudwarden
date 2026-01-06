@@ -9,6 +9,10 @@ NC='\033[0m' # No Color
 echo -e "${BLUE}Cloudwarden Auto-Installer${NC}"
 echo "--------------------------------"
 
+#Get current user
+CURRENT_USER=$(logname)
+CURRENT_USER_GRP=$(sudo -u $CURRENT_USER id -gn)
+
 # Check if running as root
 if [ "$EUID" -ne 0 ]; then 
   echo -e "${RED}Please run as root (use sudo).${NC}"
@@ -63,6 +67,8 @@ CONTAINERS_DATA=${CONTAINERS_DATA:-/opt/cloudwarden}
 
 # Create data directories
 mkdir -p "$CONTAINERS_DATA"
+sudo chown $CURRENT_USER:$CURRENT_USER_GRP -R /opt/cloudwarden/
+
 
 read -p "Enter Email Address for Let's Encrypt: " EMAIL_ADDRESS
 read -p "Enter your domain name: " DOMAIN_NAME
@@ -181,6 +187,14 @@ else
     echo -e "${GREEN}Network '$NETWORK_NAME' already exists.${NC}"
 fi
 
+# Fix permissiom
+if [[ "$CURRENT_USER" != "root" ]]; then
+    usermod -aG docker $CURRENT_USER
+    chown $CURRENT_USER:$CURRENT_USER_GRP docker-compose.yml
+    chown $CURRENT_USER:$CURRENT_USER_GRP .env
+    chown -R $CURRENT_USER:$CURRENT_USER_GRP $CONTAINERS_DATA
+fi
+
 # Start Services
 echo -e "\n${BLUE}Starting services...${NC}"
 docker compose up -d
@@ -188,6 +202,7 @@ docker compose up -d
 echo -e "\n${GREEN}Installation completed!${NC}"
 echo -e "\n${BLUE}Next steps:${NC}"
 echo -e "To connect to the VPN remotetely you need to ${RED}Open the port 51820/udp in your firewall.${NC}"
+echo -e "${GREEN}$VPN_DOMAIN_NAME will be uses to connect to the VPN remotely.${NC}"
 echo -e "\n${BLUE}Access WG_EASY UI :${NC}"
 echo "If you ran this script on a machine running in your local network,"
 echo "you can access the WG_EASY UI using http://your_local_ip:51821"
