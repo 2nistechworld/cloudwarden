@@ -150,19 +150,24 @@ else
     VPN_DOMAIN_NAME=$PUBLIC_IP
 fi
 
+#Inernal domain names
+VAULTWARDEN_DOMAIN_NAME=vault.$DOMAIN_NAME
+VPNUI_DOMAIN_NAME=vpnui.$DOMAIN_NAME
+
 #Edit the .env file
 ENV_FILE=.env
 #GENERAL
 sed -i "s;<CONTAINERS_DATA>;$CONTAINERS_DATA;g" $ENV_FILE
-sed -i "s;<DOMAIN_NAME>;$DOMAIN_NAME;g" $ENV_FILE
 sed -i "s;<EMAIL_ADDRESS>;$EMAIL_ADDRESS;g" $ENV_FILE
 #WG-EASY
 sed -i "s;<VPN_DOMAIN_NAME>;$VPN_DOMAIN_NAME;g" $ENV_FILE
+sed -i "s;<VPNUI_DOMAIN_NAME>;$VPNUI_DOMAIN_NAME;g" $ENV_FILE
 #TRAEFIK
 sed -i "s;<CLOUDFLARE_API_KEY>;$CLOUDFLARE_API_KEY;g" $ENV_FILE
 #VAULTWARDEN
 sed -i "s;<PUSH_INSTALLATION_ID>;$PUSH_INSTALLATION_ID;g" $ENV_FILE
 sed -i "s;<PUSH_INSTALLATION_KEY>;$PUSH_INSTALLATION_KEY;g" $ENV_FILE
+sed -i "s;<VAULTWARDEN_DOMAIN_NAME>;$VAULTWARDEN_DOMAIN_NAME;g" $ENV_FILE
 
 #Create folders
 mkdir -p "$CONTAINERS_DATA/wg-easy"
@@ -174,14 +179,17 @@ mkdir -p "$CONTAINERS_DATA/vaultwarden/data"
 ## Create passwords
 ## AdGuardHome
 ADGUARDHOME_PASSWORD=$(cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 35 ; echo '')
+echo -e "\n${BLUE}Generating AdGuardHome Password...${NC}"
 docker pull httpd:2.4
 ADGUARDHOME_PASSWORD_HASH=$(docker run httpd:2.4 htpasswd -B -n -b $EMAIL_ADDRESS $ADGUARDHOME_PASSWORD | cut -d ":" -f2)
 ##Create adguard rewrite for Vaultwarden
 cp AdGuardHome.yaml $CONTAINERS_DATA/adguardhome/conf/AdGuardHome.yaml
 sed -i "s;<EMAIL_ADDRESS>;$EMAIL_ADDRESS;g" $CONTAINERS_DATA/adguardhome/conf/AdGuardHome.yaml
 sed -i "s;<ADGUARDHOME_PASSWORD_HASH>;$ADGUARDHOME_PASSWORD_HASH;g" $CONTAINERS_DATA/adguardhome/conf/AdGuardHome.yaml
-sed -i "s;<DOMAIN_NAME>;$DOMAIN_NAME;g" $CONTAINERS_DATA/adguardhome/conf/AdGuardHome.yaml
+sed -i "s;<VPNUI_DOMAIN_NAME>;$VPNUI_DOMAIN_NAME;g" $CONTAINERS_DATA/adguardhome/conf/AdGuardHome.yaml
+sed -i "s;<VAULTWARDEN_DOMAIN_NAME>;$VAULTWARDEN_DOMAIN_NAME;g" $CONTAINERS_DATA/adguardhome/conf/AdGuardHome.yaml
 
+echo -e "\n${BLUE}Creating docker network...${NC}"
 # Create Docker Network
 NETWORK_NAME="my_network"
 if ! docker network ls | grep -q "$NETWORK_NAME"; then
@@ -218,8 +226,8 @@ echo -e "${BLUE}ssh -L 51821:172.19.0.2:51821 $CURRENT_USER@$PUBLIC_IP${NC} in y
 echo "Once the tunnel ceated, open a browser and access http://localhost:51821"
 echo -e "\n${BLUE}Informations :${NC}"
 echo -e "\n${GREEN}Once connected to the VPN you can access :${NC}"
-echo "WG-EASY UI: https://vpnui.$DOMAIN_NAME"
-echo "Vaultwarden: https://vault.$DOMAIN_NAME"
+echo "WG-EASY UI: https://$VPNUI_DOMAIN_NAME"
+echo "Vaultwarden: https://$VAULTWARDEN_DOMAIN_NAME"
 echo "AdGuardHome: http://172.19.0.3"
 echo "Login: $EMAIL_ADDRESS"
 echo "Password: $ADGUARDHOME_PASSWORD"

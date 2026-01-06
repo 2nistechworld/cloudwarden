@@ -149,10 +149,10 @@ filtering:
   parental_block_host: family-block.dns.adguard.com
   safebrowsing_block_host: standard-block.dns.adguard.com
   rewrites:
-    - domain: vault.<DOMAIN_NAME>
+    - domain: <VAULTWARDEN_DOMAIN_NAME>
       answer: 172.19.0.4
       enabled: true
-    - domain: vpnui.<DOMAIN_NAME>
+    - domain: <VPNUI_DOMAIN_NAME>
       answer: 172.19.0.4
       enabled: true  
   safe_fs_patterns:

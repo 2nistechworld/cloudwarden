@@ -4,7 +4,7 @@ networks:
 
 services:
 
-## VPN
+  ## VPN
   wg-easy:
     image: ghcr.io/wg-easy/wg-easy:15
     container_name: wg-easy
@@ -33,12 +33,12 @@ services:
     labels:
       - traefik.enable=true
       - traefik.http.services.wg-easy.loadbalancer.server.port=51821
-      - traefik.http.routers.wg-easy.rule=Host(`vpnui.${DOMAIN_NAME}`)
+      - traefik.http.routers.wg-easy.rule=Host(`${VPNUI_DOMAIN_NAME}`)
       - traefik.http.routers.wg-easy.entrypoints=web-secure
       - traefik.http.routers.wg-easy.tls=true
       - traefik.http.routers.wg-easy.tls.certresolver=myresolver
 
-## DNS / AD Blocker
+  ## DNS / AD Blocker
   adguardhome:
     image: adguard/adguardhome
     container_name: adguardhome
@@ -50,7 +50,7 @@ services:
         ipv4_address: 172.19.0.3
     restart: always
 
-## Reverse Proxy and TLS
+  ## Reverse Proxy and TLS
   traefik:
     container_name: traefik
     image: traefik:v3.6.1
@@ -77,14 +77,14 @@ services:
         ipv4_address: 172.19.0.4
     restart: always
 
-## Password Manager
+  ## Password Manager
   vaultwarden:
     image: vaultwarden/server:1.35.1
     container_name: vaultwarden
     environment:
       - TZ=Europe/Paris
       - SIGNUPS_ALLOWED=true
-      - DOMAIN=https://vault.${DOMAIN_NAME}
+      - DOMAIN=https://${VAULTWARDEN_DOMAIN_NAME}
       ## To enable push go to https://bitwarden.com/host/ to get your ID and Key
       - PUSH_ENABLED=true
       - PUSH_INSTALLATION_ID=${PUSH_INSTALLATION_ID}
@@ -102,7 +102,7 @@ services:
         ipv4_address: 172.19.0.5
     labels:
       - traefik.enable=true
-      - traefik.http.routers.vaultwarden.rule=Host(`vault.${DOMAIN_NAME}`)
+      - traefik.http.routers.vaultwarden.rule=Host(`${VAULTWARDEN_DOMAIN_NAME}`)
       - traefik.http.routers.vaultwarden.entrypoints=web-secure
       - traefik.http.routers.vaultwarden.tls=true
       - traefik.http.routers.vaultwarden.tls.certresolver=myresolver
