@@ -54,9 +54,9 @@ check_dependencies() {
 check_dependencies
 
 # Download docker-compose file and .env
-wget -O docker-compose.yml https://raw.githubusercontent.com/2nistechworld/cloudwarden/refs/heads/main/docker-compose.yml
-wget -O .env https://raw.githubusercontent.com/2nistechworld/cloudwarden/refs/heads/main/example.env
-wget -O AdGuardHome.yaml https://raw.githubusercontent.com/2nistechworld/cloudwarden/refs/heads/main/AdGuardHome.yaml
+curl -fsSL https://raw.githubusercontent.com/2nistechworld/cloudwarden/refs/heads/main/docker-compose.yml -o docker-compose.yml
+curl -fsSL https://raw.githubusercontent.com/2nistechworld/cloudwarden/refs/heads/main/example.env -o .env
+curl -fsSL https://raw.githubusercontent.com/2nistechworld/cloudwarden/refs/heads/main/AdGuardHome.yaml -o AdGuardHome.yaml
 
 # Configuration Prompts
 echo -e "\n${BLUE}Configuration${NC}"
@@ -67,7 +67,7 @@ CONTAINERS_DATA=${CONTAINERS_DATA:-/opt/cloudwarden}
 
 # Create data directories
 mkdir -p "$CONTAINERS_DATA"
-sudo chown $CURRENT_USER:$CURRENT_USER_GRP -R /opt/cloudwarden/
+sudo chown $CURRENT_USER:$CURRENT_USER_GRP -R "$CONTAINERS_DATA"
 
 
 read -p "Enter Email Address for Let's Encrypt: " EMAIL_ADDRESS
@@ -160,11 +160,11 @@ sed -i "s;<PUSH_INSTALLATION_ID>;$PUSH_INSTALLATION_ID;g" $ENV_FILE
 sed -i "s;<PUSH_INSTALLATION_KEY>;$PUSH_INSTALLATION_KEY;g" $ENV_FILE
 
 #Create folders
-mkdir -p $CONTAINERS_DATA/wg-easy
-mkdir -p $CONTAINERS_DATA/adguardhome/work
-mkdir -p $CONTAINERS_DATA/adguardhome/conf
-mkdir -p $CONTAINERS_DATA/traefik/letsencrypt
-mkdir -p $CONTAINERS_DATA/vaultwarden/data
+mkdir -p "$CONTAINERS_DATA/wg-easy"
+mkdir -p "$CONTAINERS_DATA/adguardhome/work"
+mkdir -p "$CONTAINERS_DATA/adguardhome/conf"
+mkdir -p "$CONTAINERS_DATA/traefik/letsencrypt"
+mkdir -p "$CONTAINERS_DATA/vaultwarden/data"
 
 ## Create passwords
 ## AdGuardHome
@@ -209,8 +209,8 @@ echo "you can access the WG_EASY UI using http://your_local_ip:51821"
 echo "Or"
 echo "If you ran this script on a cloud VPS, you can either temporary open the port 51821/tcp "
 echo "to acess WG_EASY UI using http://$PUBLIC_IP:51821 or create a SSH tunnel with the command:"
-echo "ssh -L 51821:172.19.0.2:51821 user@$PUBLIC_IP in your terminal"
-echo "Once the tunnel open open a browser and access http://localhost:51821"
+echo "${BLUE}ssh -L 51821:172.19.0.2:51821 $CURRENT_USER@$PUBLIC_IP${NC} in your terminal"
+echo "Once the tunnel ceated, open a browser and access http://localhost:51821"
 echo -e "\n${BLUE}Informations :${NC}"
 echo -e "\n${GREEN}Once connected to the VPN you can access :${NC}"
 echo "WG-EASY UI: https://vpnui.$DOMAIN_NAME"
