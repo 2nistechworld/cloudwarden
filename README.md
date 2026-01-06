@@ -175,6 +175,7 @@ To get you API token go to https://dash.cloudflare.com/profile/api-tokens
 
 ## How to get your Bitwarden installation ID and key
 Go to https://bitwarden.com/host/ and follow the instructions.
+
 ---
 **Supported Projects:**
 - [Traefik](https://traefik.io/traefik)
