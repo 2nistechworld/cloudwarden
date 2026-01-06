@@ -11,6 +11,7 @@ This configuration will NOT expose the password manager to the internet; it will
 - Docker and Docker Compose installed
 - A domain name managed by Cloudflare
 - A [Cloudflare API Key](https://github.com/2nistechworld/cloudwarden#how-to-get-your-cloudflare-api-key)
+- A [Bitwarden installation ID and key](https://github.com/2nistechworld/cloudwarden#how-to-get-your-bitwarden-installation-id-and-key)
 
 ## Docker Containers
 - [wg-easy](https://github.com/wg-easy/wg-easy): VPN using WireGuard to access the server and the Password Manager.
@@ -172,6 +173,8 @@ To get you API token go to https://dash.cloudflare.com/profile/api-tokens
 
 - Continue to summary and save your API token.
 
+## How to get your Bitwarden installation ID and key
+Go to https://bitwarden.com/host/ and follow the instructions.
 ---
 **Supported Projects:**
 - [Traefik](https://traefik.io/traefik)
