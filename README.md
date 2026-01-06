@@ -14,9 +14,28 @@ This configuration will NOT expose the password manager to the internet; it will
 
 ## Docker Containers
 - [wg-easy](https://github.com/wg-easy/wg-easy): VPN using WireGuard to access the server and the Password Manager.
+    - **Modern Web UI**: Complete rewrite with a sleek, responsive design.
+    - **Traffic Statistics**: Real-time Rx/Tx charts for connected clients.
+    - **2FA Support**: Enhanced security with Two-Factor Authentication (TOTP).
+    - **Client Management**: Easy QR code scanning and configuration downloading.
+    - **Multi-language Support**: Interface available in multiple languages.
 - [Traefik](https://traefik.io/traefik): Reverse proxy to access Vaultwarden. Manages SSL/TLS certificates using Let's Encrypt.
+    - **Automatic SSL/TLS**: Auto-provisioning and renewal of certificates via Let's Encrypt.
+    - **Web Dashboard**: Monitoring and configuration visualization.
+    - **Middleware Support**: Powerful request modification handling.
+    - **Load Balancing**: Efficient traffic distribution.
 - [AdGuard Home](https://adguard.com/): DNS Server to resolve Vaultwarden URL when connected to the VPN. Can also be used to block ads.
+    - **Network-wide Protection**: Blocks ads and trackers for all devices.
+    - **Parental Controls**: Enforce safe search and block adult content.
+    - **Encrypted DNS**: Supports DNS-over-HTTPS (DoH) and DNS-over-TLS (DoT).
+    - **DNS Rewrite**: Custom DNS rules to redirect specific domains (e.g., for local services).
+    - **DHCP Server**: Built-in DHCP handling for your network.
 - [Vaultwarden](https://github.com/dani-garcia/vaultwarden): The Password Manager.
+    - **Full Compatibility**: Works with official Bitwarden apps and extensions.
+    - **Advanced Storage**: Store TOTP seeds, Passkeys, and SSH Keys.
+    - **2FA/MFA**: Supports Authenticator apps, YubiKey, and FIDO2 WebAuthn.
+    - **Organization Support**: Share passwords securely with groups and families.
+    - **Lightweight**: Optimized for low-resource environments (unlike the official server).
 
 ## Installation Methods
 
@@ -35,7 +54,7 @@ The `install.sh` script is designed to automate the entire deployment process.
 Run the script as root (or with sudo):
 ```bash
 curl -fsSL https://raw.githubusercontent.com/2nistechworld/cloudwarden/refs/heads/main/install.sh -o install.sh
-sudo bash install.sh
+(sudo) bash install.sh
 ```
 
 ### Option 2: Manual Installation
@@ -96,17 +115,22 @@ Edit `$DATA_PATH/adguardhome/conf/AdGuardHome.yaml`:
 #### 6. Configure `.env` File
 Edit the `.env` file and fill in the following values:
 
-| Name                    | Description                                      |
-|-------------------------|--------------------------------------------------|
-| CONTAINERS_DATA         | Path to data folders (e.g., `/opt/cloudwarden`)  |
-| EMAIL_ADDRESS           | Email address for Let's Encrypt notifications    |
-| PUSH_INSTALLATION_ID    | Bitwarden installation ID (from bitwarden.com)   |
-| PUSH_INSTALLATION_KEY   | Bitwarden installation key (from bitwarden.com)  |
-| VPN_DOMAIN_NAME         | Subdomain for VPN (e.g., `vpn.example.com`)      |
-| CLOUDFLARE_API_KEY      | Your Cloudflare API Token                        |
-| DOMAIN_NAME             | Your main domain (e.g., `example.com`)           |
+| Name                    | Description                                        |
+|-------------------------|----------------------------------------------------|
+| CONTAINERS_DATA         | Path to data folders (e.g., `/opt/cloudwarden`)    |
+| EMAIL_ADDRESS           | Email address for Let's Encrypt notifications      |
+| VPN_DOMAIN_NAME         | External domain for VPN (e.g., `vpn.example.com`). |
+| VPNUI_DOMAIN_NAME       | Domain for WG-Easy UI (e.g., `wg.example.com`)     |
+| WG_EASY_INIT_PASSWORD   | Password for WG-Easy UI (e.g., `yourpassword`)     |
+| CLOUDFLARE_API_KEY      | Your Cloudflare API Token                          |
+| PUSH_INSTALLATION_ID    | Bitwarden installation ID (from bitwarden.com)     |
+| PUSH_INSTALLATION_KEY   | Bitwarden installation key (from bitwarden.com)    |
+| VAULTWARDEN_DOMAIN_NAME | Domain for Vaultwarden (e.g., `vault.example.com`) |
 
-**Note:** If you are in the EU region, uncomment the `PUSH_RELAY_URI` and `PUSH_IDENTITY_URI` lines in `docker-compose.yml`.
+**Notes:** 
+- `EMAIL_ADDRESS` will be used as login for AdGuardHome and wg-easy UI.
+- `WG_EASY_INIT_PASSWORD` is the password for the WG-Easy UI, it will be used only once to initialize the WG-Easy container. you can put the value a null once the container is initialized.
+- For Vaultwarden, if you are in the EU region, uncomment the `PUSH_RELAY_URI` and `PUSH_IDENTITY_URI` lines in `docker-compose.yml`.
 
 #### 7. Start Services
 Once configured, start the stack:

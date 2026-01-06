@@ -155,7 +155,7 @@ VAULTWARDEN_DOMAIN_NAME=vault.$DOMAIN_NAME
 VPNUI_DOMAIN_NAME=vpnui.$DOMAIN_NAME
 
 #Generate password for wg-easy
-WG_EASY_PASSWORD=$(cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 35 ; echo '')
+WG_EASY_INIT_PASSWORD=$(cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 35 ; echo '')
 
 #Edit the .env file
 ENV_FILE=.env
@@ -165,7 +165,7 @@ sed -i "s;<EMAIL_ADDRESS>;$EMAIL_ADDRESS;g" $ENV_FILE
 #WG-EASY
 sed -i "s;<VPN_DOMAIN_NAME>;$VPN_DOMAIN_NAME;g" $ENV_FILE
 sed -i "s;<VPNUI_DOMAIN_NAME>;$VPNUI_DOMAIN_NAME;g" $ENV_FILE
-sed -i "s;<WG_EASY_PASSWORD>;$WG_EASY_PASSWORD;g" $ENV_FILE
+sed -i "s;<WG_EASY_INIT_PASSWORD>;$WG_EASY_INIT_PASSWORD;g" $ENV_FILE
 #TRAEFIK
 sed -i "s;<CLOUDFLARE_API_KEY>;$CLOUDFLARE_API_KEY;g" $ENV_FILE
 #VAULTWARDEN
@@ -242,4 +242,4 @@ echo -e "${RED}Keep them in a safe place.${NC}"
 
 #cleanup
 rm -f AdGuardHome.yaml 
-sed -i 's/^WG_EASY_PASSWORD=.*/WG_EASY_PASSWORD=null/' .env
+sed -i 's/^WG_EASY_INIT_PASSWORD=.*/WG_EASY_INIT_PASSWORD=null/' .env
