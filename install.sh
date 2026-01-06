@@ -229,8 +229,8 @@ echo -e "\n${GREEN}Once connected to the VPN you can access :${NC}"
 echo "WG-EASY UI: https://$VPNUI_DOMAIN_NAME"
 echo "Vaultwarden: https://$VAULTWARDEN_DOMAIN_NAME"
 echo "AdGuardHome: http://172.19.0.3"
-echo "Login: $EMAIL_ADDRESS"
-echo "Password: $ADGUARDHOME_PASSWORD"
+echo "AdGuardHome Login: $EMAIL_ADDRESS"
+echo "AdGuardHome Password: $ADGUARDHOME_PASSWORD"
 
 #cleanup
 rm -f AdGuardHome.yaml 
