@@ -11,7 +11,10 @@ echo "--------------------------------"
 
 #Get current user
 CURRENT_USER=$(logname)
-CURRENT_USER_GRP=$(sudo -u $CURRENT_USER id -gn)
+# Fix permissiom
+if [[ "$CURRENT_USER" != "root" ]]; then
+    CURRENT_USER_GRP=$(sudo -u $CURRENT_USER id -gn)
+fi
 
 # Check if running as root
 if [ "$EUID" -ne 0 ]; then 
@@ -67,7 +70,9 @@ CONTAINERS_DATA=${CONTAINERS_DATA:-/opt/cloudwarden}
 
 # Create data directories
 mkdir -p "$CONTAINERS_DATA"
-sudo chown $CURRENT_USER:$CURRENT_USER_GRP -R "$CONTAINERS_DATA"
+if [[ "$CURRENT_USER" != "root" ]]; then
+    chown $CURRENT_USER:$CURRENT_USER_GRP -R "$CONTAINERS_DATA"
+fi
 
 
 read -p "Enter Email Address for Let's Encrypt: " EMAIL_ADDRESS
