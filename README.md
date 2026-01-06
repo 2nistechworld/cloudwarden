@@ -3,6 +3,7 @@
 ## Description
 This is a docker compose configuration to securely self host a Vaultwarden Password Manager instance locally or on a VPS.
 This configuration will NOT expose the password manager to the internet; it will be only accessible via VPN (WireGuard).
+
 <img src="/images/Diagram.drawio.png" style="align:center">
 
 ## Prerequisites
