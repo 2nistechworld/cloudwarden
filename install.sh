@@ -154,6 +154,9 @@ fi
 VAULTWARDEN_DOMAIN_NAME=vault.$DOMAIN_NAME
 VPNUI_DOMAIN_NAME=vpnui.$DOMAIN_NAME
 
+#Generate password for wg-easy
+WG_EASY_PASSWORD=$(cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 35 ; echo '')
+
 #Edit the .env file
 ENV_FILE=.env
 #GENERAL
@@ -162,6 +165,7 @@ sed -i "s;<EMAIL_ADDRESS>;$EMAIL_ADDRESS;g" $ENV_FILE
 #WG-EASY
 sed -i "s;<VPN_DOMAIN_NAME>;$VPN_DOMAIN_NAME;g" $ENV_FILE
 sed -i "s;<VPNUI_DOMAIN_NAME>;$VPNUI_DOMAIN_NAME;g" $ENV_FILE
+sed -i "s;<WG_EASY_PASSWORD>;$WG_EASY_PASSWORD;g" $ENV_FILE
 #TRAEFIK
 sed -i "s;<CLOUDFLARE_API_KEY>;$CLOUDFLARE_API_KEY;g" $ENV_FILE
 #VAULTWARDEN
@@ -179,7 +183,7 @@ mkdir -p "$CONTAINERS_DATA/vaultwarden/data"
 ## Create passwords
 ## AdGuardHome
 ADGUARDHOME_PASSWORD=$(cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 35 ; echo '')
-echo -e "\n${BLUE}Generating AdGuardHome Password...${NC}"
+echo -e "\n${BLUE}Generating AdGuardHome Password unsing htpasswd from httpd:2.4 docker image...${NC}"
 docker pull httpd:2.4
 ADGUARDHOME_PASSWORD_HASH=$(docker run httpd:2.4 htpasswd -B -n -b $EMAIL_ADDRESS $ADGUARDHOME_PASSWORD | cut -d ":" -f2)
 ##Create adguard rewrite for Vaultwarden
@@ -217,6 +221,8 @@ echo -e "\n${BLUE}Next steps:${NC}"
 echo -e "To connect to the VPN remotetely you need to ${RED}Open the port 51820/udp in your firewall.${NC}"
 echo -e "${GREEN}$VPN_DOMAIN_NAME will be uses to connect to the VPN remotely.${NC}"
 echo -e "\n${BLUE}Access WG_EASY UI :${NC}"
+echo "WG-EASY Username: $EMAIL_ADDRESS"
+echo "WG-EASY Password: $WG_EASY_PASSWORD"
 echo "If you ran this script on a machine running in your local network,"
 echo "you can access the WG_EASY UI using http://your_local_ip:51821"
 echo "Or"
@@ -227,10 +233,13 @@ echo "Once the tunnel ceated, open a browser and access http://localhost:51821"
 echo -e "\n${BLUE}Informations :${NC}"
 echo -e "\n${GREEN}Once connected to the VPN you can access :${NC}"
 echo "WG-EASY UI: https://$VPNUI_DOMAIN_NAME"
-echo "Vaultwarden: https://$VAULTWARDEN_DOMAIN_NAME"
 echo "AdGuardHome: http://172.19.0.3"
 echo "AdGuardHome Login: $EMAIL_ADDRESS"
 echo "AdGuardHome Password: $ADGUARDHOME_PASSWORD"
+echo "Vaultwarden: https://$VAULTWARDEN_DOMAIN_NAME"
+echo -e "${RED}The passwords will be only displayed once.${NC}"
+echo -e "${RED}Keep them in a safe place.${NC}"
 
 #cleanup
 rm -f AdGuardHome.yaml 
+sed -i 's/^WG_EASY_PASSWORD=.*/WG_EASY_PASSWORD=null/' .env

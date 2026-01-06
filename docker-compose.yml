@@ -10,9 +10,11 @@ services:
     container_name: wg-easy
     environment:
       - INSECURE=true
-      - HOST=172.19.0.2
       - INIT_ENABLED=true
+      - INIT_USERNAME=${EMAIL_ADDRESS}
+      - INIT_PASSWORD=${WG_EASY_PASSWORD}
       - INIT_HOST=${VPN_DOMAIN_NAME}
+      - INIT_PORT=51820
       - INIT_DNS=172.19.0.3
     volumes:
       - ${CONTAINERS_DATA}/wg-easy:/etc/wireguard
